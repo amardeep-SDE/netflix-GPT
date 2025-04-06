@@ -4,15 +4,28 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 import { addUser, removeUser } from "../utils/userSlice";
-import { NETFLIX_LOGO } from "../utils/constant";
 import { toggleGptSearchView } from "../utils/gptSlice";
+import { SUPPORTED_LANGUAGES, NETFLIX_LOGO } from "../utils/constant";
+import { changeLanguage } from "../utils/configSlice";
+
 const Header = () => {
   const navigate = useNavigate();
 
   const user = useSelector((store) => store.user);
   const gptSearch = useSelector((store) => store.movies?.showGptSearch);
 
+  const showGptSearch = useSelector((store) => store.gpt.showGptSearch);
+
   const dispatch = useDispatch();
+
+  const handleGptSearchClick = () => {
+    // Toggle GPT Search
+    dispatch(toggleGptSearchView());
+  };
+
+  const handleLanguageChange = (e) => {
+    dispatch(changeLanguage(e.target.value));
+  };
   const handleSignOut = () => {
     signOut(auth)
       .then(() => {
@@ -50,19 +63,29 @@ const Header = () => {
     });
   }, []);
 
-  const handleGptSearchClick = () => {
-    dispatch(toggleGptSearchView());
-  };
+
   return (
     <div className="w-full flex justify-between items-center absolute px-8 py-2 bg-gradient-to-b from-black z-10">
       <img className="w-44" src={NETFLIX_LOGO} alt="logo" />
       {user && (
-        <div className="flex items-center gap-4">
+        <div className="flex p-2">
+          {showGptSearch && (
+            <select
+              className="p-2 m-2 bg-gray-900 text-white"
+              onChange={handleLanguageChange}
+            >
+              {SUPPORTED_LANGUAGES.map((lang) => (
+                <option key={lang.identifier} value={lang.identifier}>
+                  {lang.name}
+                </option>
+              ))}
+            </select>
+          )}
           <button
+            className="py-2 px-4 mx-4 my-2 bg-purple-800 text-white rounded-lg"
             onClick={handleGptSearchClick}
-            className="text-white bg-pink-400 m-2 p-2 rounded-md"
           >
-            GPT Search
+            {showGptSearch ? "Homepage" : "GPT Search"}
           </button>
 
           <img src={user?.photoURL} alt="user" className="w-10 rounded-full" />
